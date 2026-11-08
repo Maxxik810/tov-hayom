@@ -1,0 +1,65 @@
+// נתוני דמה לאב-טיפוס. אין כאן קריאה לשרת ואין מפתחות.
+// המבנה זהה לקבצי data/*.json ולתשובת action=home ב-ARCHITECTURE.md.
+// כל השעות, התאריכים, הדירוגים והמשפטים הם להמחשה בלבד ולא נבדקו מול מקור רשמי.
+// הקובץ הוא JS ולא JSON כדי שהאתר ייפתח גם בלחיצה כפולה על index.html (בלי שרת).
+
+window.TOV_MOCK = {
+  // data/categories.json
+  categories: [
+    { id: "museums",         label: "מוזיאון" },
+    { id: "parks",           label: "פארק" },
+    { id: "theaters",        label: "תיאטרון" },
+    { id: "nature_reserves", label: "שמורת טבע" },
+    { id: "heritage_sites",  label: "אתר מורשת והיסטוריה" }
+  ],
+
+  // data/areas.json, לפי ARCHITECTURE.md: אזור אחד לכל אשדוד, ואזור לכל יישוב מחוץ לה.
+  // הגבול: עד בית שמש וראשון לציון (לא כולל), ומדרום עד באר שבע (כולל).
+  // הנחה: היישובים מחוץ לאשדוד נבחרו לאב-טיפוס בלבד.
+  areas: [
+    { id: "ashdod",     label: "אשדוד",    in_label: "באשדוד" },
+    { id: "yavne",      label: "יבנה",     in_label: "ביבנה" },
+    { id: "gedera",     label: "גדרה",     in_label: "בגדרה" },
+    { id: "nitzanim",   label: "ניצנים",   in_label: "בניצנים" },
+    { id: "ashkelon",   label: "אשקלון",   in_label: "באשקלון" },
+    { id: "beer_sheva", label: "באר שבע",  in_label: "בבאר שבע" }
+  ],
+
+  // data/verification-levels.json (ההסבר לפי כלל "מאומת" ב-product-10-definitions.md)
+  levels: [
+    { id: "verified",   label: "מאומת",    explanation: "יש מקור רשמי למקום (האתר הרשמי שלו, רשות הטבע והגנים או העירייה), השעות זהות למקור, והבדיקה האחרונה לפני 90 יום לכל היותר." },
+    { id: "checked",    label: "נבדק",     explanation: "שני מקורות ברשת לפחות, או אישור ידני של המנהל. גם מקום מאומת שלא נבדק שוב תוך 90 יום. מוצג עם תאריך." },
+    { id: "unverified", label: "לא מאומת", explanation: "מקור יחיד, מידע סותר או חסר. לא מוצג." },
+    { id: "unsafe",     label: "לא בטוח",  explanation: "מסומן כמסוכן או מפוקפק. לא מוצג." }
+  ],
+
+  // טבלת places (15 מקומות, 3 לכל קטגוריה). image_file ריק = אריח הקטגוריה.
+  // mock_rating: רק לאב-טיפוס. במוצר הדירוג מגיע חי מ-Google Places ולא נשמר.
+  places: [
+    { id: "p01", name: "מוזיאון קורין ממן",       category: "museums", area: "ashdod", verification_level: "verified", last_verified_at: "2026-11-02", opening_hours: "א'-ה' 09:00-16:00, ו' 09:00-13:00", image_file: null, is_blocked: false, mock_rating: 4.5 },
+    { id: "p02", name: "המוזיאון לאמנות אשדוד",  category: "museums", area: "ashdod", verification_level: "verified", last_verified_at: "2026-11-05", opening_hours: "א'-ה' 10:00-18:00, ו' 10:00-14:00", image_file: null, is_blocked: false, mock_rating: 4.4 },
+    { id: "p03", name: "מוזיאון לדוגמה",          category: "museums", area: "yavne",  verification_level: "checked",  last_verified_at: "2026-10-20", opening_hours: null, image_file: null, is_blocked: false, mock_rating: 4.3 },
+
+    { id: "p04", name: "פארק לכיש",      category: "parks", area: "ashdod", verification_level: "verified", last_verified_at: "2026-10-28", opening_hours: "פתוח כל השבוע, כל היום", image_file: null, is_blocked: false, mock_rating: 4.6 },
+    { id: "p05", name: "הגן הלאומי אשקלון", category: "parks", area: "ashkelon", verification_level: "verified", last_verified_at: "2026-10-30", opening_hours: "פתוח כל השבוע, כל היום", image_file: null, is_blocked: false, mock_rating: null },
+    { id: "p06", name: "פארק אשדוד ים",  category: "parks", area: "ashdod", verification_level: "verified", last_verified_at: "2026-07-20", opening_hours: "פתוח כל השבוע, כל היום", image_file: null, is_blocked: false, mock_rating: 4.6 },
+
+    { id: "p07", name: "המשכן לאמנויות הבמה אשדוד", category: "theaters", area: "ashdod", verification_level: "verified", last_verified_at: "2026-11-01", opening_hours: "קופה: א'-ה' 10:00-19:00", image_file: null, is_blocked: false, mock_rating: 4.6 },
+    { id: "p08", name: "תיאטרון לדוגמה",            category: "theaters", area: "yavne",  verification_level: "verified", last_verified_at: "2026-10-25", opening_hours: "קופה: א'-ה' 10:00-19:00", image_file: null, is_blocked: false, mock_rating: 4.4 },
+    { id: "p09", name: "אולם מופעים לדוגמה",        category: "theaters", area: "ashdod", verification_level: "verified", last_verified_at: "2026-10-22", opening_hours: "קופה: א'-ה' 10:00-19:00", image_file: null, is_blocked: true,  mock_rating: 4.5 },
+
+    { id: "p10", name: "שמורת חולות ניצנים", category: "nature_reserves", area: "nitzanim", verification_level: "verified",   last_verified_at: "2026-11-06", opening_hours: "א'-ה' 08:00-17:00, ו' 08:00-16:00", image_file: null, is_blocked: false, mock_rating: 4.6 },
+    { id: "p11", name: "שמורת טבע לדוגמה",   category: "nature_reserves", area: "ashkelon", verification_level: "checked",    last_verified_at: "2026-10-15", opening_hours: "א'-ה' 08:00-16:00", image_file: null, is_blocked: false, mock_rating: 4.4 },
+    { id: "p12", name: "שמורת נחל לדוגמה",   category: "nature_reserves", area: "yavne", verification_level: "unverified", last_verified_at: null,         opening_hours: null, image_file: null, is_blocked: false, mock_rating: null },
+
+    { id: "p13", name: "מצודת אשדוד ים",   category: "heritage_sites", area: "ashdod", verification_level: "verified", last_verified_at: "2026-10-18", opening_hours: "פתוח כל השבוע, כל היום", image_file: null, is_blocked: false, mock_rating: 4.5 },
+    { id: "p14", name: "תל באר שבע",       category: "heritage_sites", area: "beer_sheva",  verification_level: "checked",  last_verified_at: "2026-10-12", opening_hours: null, image_file: null, is_blocked: false, mock_rating: 4.3 },
+    { id: "p15", name: "אתר מורשת לדוגמה", category: "heritage_sites", area: "gedera", verification_level: "unsafe",   last_verified_at: "2026-10-10", opening_hours: null, image_file: null, is_blocked: false, mock_rating: null }
+  ],
+
+  // שורה מטבלת daily_cards: הכרטיס של היום. במוצר n8n יוצר אותה כל ערב.
+  daily_card: {
+    place_id: "p01",
+    sentence: "מוזיאון באשדוד שמציג ממצאים מתרבות הפלשתים, שחיו באזור לפני אלפי שנים."
+  }
+};

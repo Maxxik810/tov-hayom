@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tov Hayom</title>
+  <meta name="description" content="כל יום מקום אחד מאומת, עם תג אימות ותאריך בדיקה.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="logo" dir="ltr"><span class="logo-tov">Tov</span> Hayom</h1>
+  </header>
+
+  <main id="main" class="page" aria-busy="true">
+    <section id="today" aria-label="טיול היום"></section>
+
+    <section id="shelf-section" aria-labelledby="shelf-title">
+      <h2 id="shelf-title" class="section-title">מקומות נוספים</h2>
+      <div id="shelf" class="shelf"></div>
+      <div id="shelf-dots" class="dots" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  <footer class="demo-bar">
+    <p><strong>אב-טיפוס.</strong> נתוני דמה להמחשה בלבד: השעות, התאריכים, הדירוגים והמשפטים לא נבדקו מול מקור רשמי.</p>
+    <nav aria-label="הדגמת מצבים">
+      <a href="index.html">רגיל</a>
+      <a href="index.html?state=empty">אין המלצה</a>
+      <a href="index.html?state=loading">טעינה</a>
+      <a href="index.html?state=error">שגיאה</a>
+    </nav>
+  </footer>
+
+  <!-- פרטי מקום -->
+  <dialog id="details" class="sheet" aria-labelledby="details-title">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <button type="button" class="close-btn" aria-label="סגירה">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="sheet__body"></div>
+  </dialog>
+
+  <!-- הסבר לתג -->
+  <dialog id="badge-help" class="sheet" aria-labelledby="badge-title">
+    <div class="sheet__handle" aria-hidden="true"></div>
+    <button type="button" class="close-btn" aria-label="סגירה">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="sheet__body"></div>
+  </dialog>
+
+  <script src="data/mock-data.js"></script>
+  <script src="js/mock-api.js"></script>
+  <script src="js/lists.js"></script>
+  <script src="js/badge.js"></script>
+  <script src="js/card.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
