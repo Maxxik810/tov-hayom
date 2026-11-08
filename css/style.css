@@ -221,3 +221,11 @@ button { font: inherit; color: inherit; }
   .sheet[open] { animation: none; }
   .dots span { transition: none; }
 }
+
+/* קרדיט לתמונות */
+.credits { margin-top: 10px; }
+.credits summary { cursor: pointer; color: var(--text-2); font-weight: 500; padding: 6px 0; }
+.credits ul { margin: 6px 0 0; padding-inline-start: 18px; }
+.credits li { margin-bottom: 4px; }
+.credits a { color: var(--blue); }
+.credits bdi { white-space: nowrap; }

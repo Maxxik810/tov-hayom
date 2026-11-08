@@ -209,5 +209,19 @@
     if ((new URL(a.href).searchParams.get("state") || "normal") === state) a.setAttribute("aria-current", "page");
   });
 
+  // קרדיט לתמונות ברישיון חופשי (Wikimedia Commons)
+  function renderCredits() {
+    const list = $("#credits-list");
+    const items = window.TOV_MOCK.places.filter(p => p.image_file && p.image_credit);
+    if (!items.length) { list.closest("details").hidden = true; return; }
+    list.innerHTML = items.map(p => {
+      const c = p.image_credit;
+      return `<li>${esc(p.name)} · צילום: <bdi>${esc(c.author)}</bdi> ·
+        <a href="${esc(c.source_url)}" target="_blank" rel="noopener"><bdi>${esc(c.license)}</bdi></a>
+        · <bdi>Wikimedia Commons</bdi></li>`;
+    }).join("");
+  }
+
+  renderCredits();
   load(state);
 })();
