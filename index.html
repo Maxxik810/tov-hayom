@@ -15,10 +15,14 @@
     <h1 class="logo" dir="ltr"><span class="logo-tov">Tov</span> Hayom</h1>
   </header>
 
-  <main id="main" class="page">
-    <!-- Milestone 1: שורה טכנית בלבד. Milestone 2 מחליף אותה במסך האמיתי -->
-    <p>תשובה מהשרת:</p>
-    <pre id="status" dir="ltr" aria-live="polite" style="white-space: pre-wrap; word-break: break-all;">טוען...</pre>
+  <main id="main" class="page" aria-busy="true">
+    <section id="today" aria-label="טיול היום"></section>
+
+    <section id="shelf-section" aria-labelledby="shelf-title" hidden>
+      <h2 id="shelf-title" class="section-title">מקומות נוספים</h2>
+      <div id="shelf" class="shelf" role="region" aria-labelledby="shelf-title" tabindex="0"></div>
+      <div id="shelf-dots" class="dots" aria-hidden="true"></div>
+    </section>
   </main>
 
   <script type="module" src="js/main.js"></script>

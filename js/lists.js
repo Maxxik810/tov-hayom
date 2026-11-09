@@ -1,26 +1,30 @@
-// תוויות בעברית לפי המזהים באנגלית (data/*.json)
-(function () {
-  const d = window.TOV_MOCK;
-  const find = (list, id) => list.find(x => x.id === id) || { id, label: id };
+// Hebrew labels for the English ids, loaded once from data/*.json
+const files = ['categories', 'areas', 'verification-levels'];
+let lists = null;
 
-  function formatDate(iso) {
-    if (!iso) return "—";
-    const [y, m, day] = iso.split("-");
-    return `${day}.${m}.${y}`; // dd.mm.yyyy
-  }
+export async function loadLists() {
+  if (lists) return lists;
+  const [categories, areas, levels] = await Promise.all(
+    files.map(async name => {
+      const res = await fetch(`data/${name}.json`);
+      if (!res.ok) throw new Error(`lists ${name}: ${res.status}`);
+      return res.json();
+    })
+  );
+  const byId = list => new Map(list.map(item => [item.id, item]));
+  lists = { categories: byId(categories), areas: byId(areas), levels: byId(levels) };
+  return lists;
+}
 
-  // escape לטקסט שנכנס ל-HTML
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, c =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  }
+const label = (map, id) => map?.get(id)?.label ?? id;
 
-  window.TovLists = {
-    category: id => find(d.categories, id),
-    area: id => find(d.areas, id),
-    level: id => find(d.levels, id),
-    levels: () => d.levels,
-    formatDate,
-    esc
-  };
-})();
+export const categoryLabel = id => label(lists?.categories, id);
+export const areaLabel = id => label(lists?.areas, id);
+export const levelLabel = id => label(lists?.levels, id);
+
+// YYYY-MM-DD -> dd.mm.yyyy
+export function formatDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}

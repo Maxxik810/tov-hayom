@@ -1,0 +1,7 @@
+[
+  { "id": "ashdod",     "label": "אשדוד",   "in_label": "באשדוד" },
+  { "id": "nitzanim",   "label": "ניצנים",  "in_label": "בניצנים" },
+  { "id": "ashkelon",   "label": "אשקלון",  "in_label": "באשקלון" },
+  { "id": "beer_sheva", "label": "באר שבע", "in_label": "בבאר שבע" },
+  { "id": "latrun",     "label": "לטרון",   "in_label": "בלטרון" }
+]

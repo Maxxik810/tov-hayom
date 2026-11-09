@@ -1,55 +1,62 @@
-// רכיב הכרטיס המשותף: renderCard(place, { variant: "today" | "shelf", sentence })
-(function () {
-  const { category, area, formatDate, esc } = TovLists;
+// The shared card component: renderCard(place, { variant: 'today' | 'shelf', sentence })
+// Every text from the data goes in with textContent only.
+import { categoryLabel, areaLabel, formatDate } from './lists.js';
+import { renderBadge } from './badge.js';
 
-  // תמונה, ואם אין תמונה (או שהיא לא נטענה) אריח בצבע הקטגוריה
-  function media(place) {
-    const cat = category(place.category);
-    const tile = `<div class="tile tile--${place.category}" aria-hidden="true">
-      <img src="img/icons/${place.category}.svg" alt=""></div>`;
-    if (!place.image_file) return tile;
-    return `<img class="card__img" src="img/places/${esc(place.image_file)}"
-      alt="${esc(place.name)}, ${esc(cat.label)}" loading="lazy" width="640" height="360"
-      onerror="this.outerHTML=this.dataset.tile" data-tile='${tile.replace(/'/g, "&#39;")}'>`;
+function el(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+}
+
+// Category tile with its icon. Place photos come in Milestone 7, with their credits.
+function media(place) {
+  const box = el('div', 'card__media');
+  const tile = el('div', `tile tile--${place.category}`);
+  tile.setAttribute('aria-hidden', 'true');
+  const img = el('img');
+  img.src = `img/icons/${place.category}.svg`;
+  img.alt = '';
+  img.onerror = () => img.remove();
+  tile.append(img);
+  box.append(tile);
+  return box;
+}
+
+export const metaText = place => `${categoryLabel(place.category)} · ${areaLabel(place.area)}`;
+
+export function renderCard(place, { variant, sentence = '' }) {
+  const date = formatDate(place.last_verified_at);
+
+  if (variant === 'today') {
+    const card = el('article', 'card card--today');
+    card.dataset.placeId = place.id;
+    const body = el('div', 'card__body');
+    const check = el('div', 'card__check');
+    check.append(renderBadge(place.verification_level), el('span', 'caption', `נבדק לאחרונה: ${date}`));
+    body.append(
+      el('span', 'tag-today', 'טיול היום'),
+      el('h2', 'card__title', place.name),
+      el('p', 'card__meta', metaText(place)),
+      check,
+      el('p', 'card__sentence', sentence)
+    );
+    card.append(media(place), body);
+    return card;
   }
 
-  function meta(place) {
-    return `${esc(category(place.category).label)} · ${esc(area(place.area).label)}`;
-  }
-
-  function renderCard(place, options) {
-    const v = options.variant;
-    const el = document.createElement(v === "shelf" ? "article" : "article");
-    el.className = `card card--${v}`;
-    el.dataset.placeId = place.id;
-
-    if (v === "today") {
-      el.innerHTML = `
-        <div class="card__media">${media(place)}</div>
-        <div class="card__body">
-          <span class="tag-today">טיול היום</span>
-          <h2 class="card__title">${esc(place.name)}</h2>
-          <p class="card__meta">${meta(place)}</p>
-          <div class="card__check">${TovBadge.badgeButton(place.verification_level)}
-            <span class="caption">נבדק לאחרונה: ${formatDate(place.last_verified_at)}</span></div>
-          <p class="card__sentence">${esc(options.sentence || "")}</p>
-          <button type="button" class="link-btn" data-details>לפרטים <span aria-hidden="true">‹</span></button>
-        </div>`;
-    } else {
-      // כרטיס מדף: כל הכרטיס נלחץ, והתג הוא כפתור נפרד
-      el.innerHTML = `
-        <button type="button" class="card__hit" data-details
-          aria-label="${esc(place.name)}, ${meta(place)}. לפרטים"></button>
-        <div class="card__media">${media(place)}</div>
-        <div class="card__body">
-          <h3 class="card__title">${esc(place.name)}</h3>
-          <p class="card__meta">${meta(place)}</p>
-          <div class="card__check">${TovBadge.badgeButton(place.verification_level)}</div>
-          <span class="caption">נבדק: ${formatDate(place.last_verified_at)}</span>
-        </div>`;
-    }
-    return el;
-  }
-
-  window.TovCard = { renderCard, meta };
-})();
+  // Shelf card: the whole card is one button (place details open from it in Milestone 5)
+  const card = el('button', 'card card--shelf');
+  card.type = 'button';
+  card.dataset.placeId = place.id;
+  const label = el('span', 'card__body');
+  label.append(
+    el('span', 'card__title', place.name),
+    el('span', 'card__meta', metaText(place)),
+    renderBadge(place.verification_level),
+    el('span', 'caption', `נבדק: ${date}`)
+  );
+  card.append(media(place), label);
+  return card;
+}

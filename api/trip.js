@@ -1,10 +1,18 @@
-// הפונקציה היחידה: /api/trip?action=...
-import { sendOk, sendError } from '../lib/http.js';
+// The only function: /api/trip?action=...
+import { sendOk, sendError, HttpError, readJsonBody, requireAutomationSecret } from '../lib/http.js';
 import { buildHome } from '../lib/home.js';
+import { runDaily } from '../lib/daily.js';
 
-// לכל פעולה: השיטה שמותרת והקוד שמטפל בה
+// For each action: the allowed method and the code that handles it
 const ACTIONS = {
-  home: { method: 'GET', run: async () => buildHome() }
+  home: { method: 'GET', run: async () => buildHome() },
+  daily: {
+    method: 'POST',
+    run: async req => {
+      requireAutomationSecret(req);
+      return runDaily(await readJsonBody(req));
+    }
+  }
 };
 
 export default async function handler(req, res) {
@@ -23,6 +31,9 @@ export default async function handler(req, res) {
     const data = await entry.run(req);
     return sendOk(res, data);
   } catch (err) {
+    if (err instanceof HttpError) {
+      return sendError(res, err.status, err.code, err.publicMessage);
+    }
     console.error(`[trip:${action}]`, err);
     return sendError(res, 500, 'server_error', 'משהו השתבש. נסו שוב מאוחר יותר');
   }

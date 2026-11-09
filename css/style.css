@@ -70,8 +70,8 @@ button { font: inherit; color: inherit; }
 .tile { width: 100%; height: 100%; display: grid; place-items: center; }
 .tile img { width: 48px; height: 48px; }
 .tile--museums { background: #FEE2DF; }
-.tile--parks { background: #E8F6EC; }
-.tile--nature_reserves { background: #FFF1DC; }
+.tile--nature_parks { background: #E8F6EC; }
+.tile--leisure { background: #FFF1DC; }
 .tile--theaters { background: #EFE6FA; }
 .tile--heritage_sites { background: #E8F2FE; }
 
@@ -92,10 +92,8 @@ button { font: inherit; color: inherit; }
   display: inline-flex; align-items: center; gap: 4px;
   border: 0; border-radius: 999px;
   padding: 2px 10px 2px 8px; min-height: 28px;
-  font-size: 13px; font-weight: 700; cursor: pointer;
-  position: relative; z-index: 1; /* מעל השכבה הלחיצה של כרטיס המדף */
+  font-size: 13px; font-weight: 700;
 }
-.badge::after { content: ""; position: absolute; inset: -8px -2px; } /* יעד מגע של 44px */
 .badge svg { width: 16px; height: 16px; flex: none; }
 .badge--verified { background: var(--success-bg); color: var(--green); }
 .badge--checked { background: var(--blue-tint); color: var(--blue-text); }
@@ -113,20 +111,20 @@ button { font: inherit; color: inherit; }
   scrollbar-width: none;
 }
 .shelf::-webkit-scrollbar { display: none; }
+.shelf:focus-visible { outline-offset: -2px; }
+/* The whole shelf card is one button */
 .card--shelf {
   flex: 0 0 42%; min-width: 150px;
   scroll-snap-align: start;
   box-shadow: var(--shadow-sm);
-  position: relative;
+  display: flex; flex-direction: column;
+  padding: 0; text-align: start; cursor: pointer;
 }
+.card--shelf .card__media { width: 100%; }
 .card--shelf .card__body { padding: 10px 12px 12px; gap: 4px; }
-.card--shelf .card__title { font-size: 18px; font-weight: 800; line-height: 1.25; }
-.card--shelf .card__meta { font-size: 13px; }
+.card--shelf .card__title { display: block; font-size: 18px; font-weight: 800; line-height: 1.25; }
+.card--shelf .card__meta { display: block; font-size: 13px; }
 .card--shelf .tile img { width: 36px; height: 36px; }
-.card__hit {
-  position: absolute; inset: 0; z-index: 0;
-  background: transparent; border: 0; border-radius: 16px; cursor: pointer;
-}
 
 .dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; min-height: 6px; }
 .dots span { width: 6px; height: 6px; border-radius: 999px; background: var(--border); transition: width .2s; }
@@ -207,25 +205,7 @@ button { font: inherit; color: inherit; }
 .level-name { font-weight: 700; }
 .level-text { font-size: 14px; color: var(--text-2); line-height: 1.4; }
 
-/* ---------- פס ההדגמה של האב-טיפוס ---------- */
-.demo-bar {
-  max-width: 480px; margin: 0 auto 24px; padding: 12px 16px;
-  font-size: 13px; color: var(--text-2); line-height: 1.4;
-  border-top: 1px solid var(--border);
-}
-.demo-bar nav { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; }
-.demo-bar a { color: var(--blue); font-weight: 500; text-decoration: none; padding: 6px 0; }
-.demo-bar a[aria-current] { color: var(--text); font-weight: 700; text-decoration: underline; }
-
 @media (prefers-reduced-motion: reduce) {
   .sheet[open] { animation: none; }
   .dots span { transition: none; }
 }
-
-/* קרדיט לתמונות */
-.credits { margin-top: 10px; }
-.credits summary { cursor: pointer; color: var(--text-2); font-weight: 500; padding: 6px 0; }
-.credits ul { margin: 6px 0 0; padding-inline-start: 18px; }
-.credits li { margin-bottom: 4px; }
-.credits a { color: var(--blue); }
-.credits bdi { white-space: nowrap; }

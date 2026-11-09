@@ -1,0 +1,7 @@
+[
+  { "id": "museums",        "label": "מוזיאון" },
+  { "id": "nature_parks",   "label": "פארק או שמורת טבע" },
+  { "id": "theaters",       "label": "תיאטרון" },
+  { "id": "heritage_sites", "label": "אתר מורשת והיסטוריה" },
+  { "id": "leisure",        "label": "מקום בילוי ופנאי" }
+]
