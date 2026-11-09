@@ -84,7 +84,11 @@ revoke all on public.places      from anon, authenticated;
 revoke all on public.daily_cards from anon, authenticated;
 revoke all on public.source_log  from anon, authenticated;
 
--- הרשאות מפורשות לפונקציה בלבד, רק מה שהמוצר צריך
+-- Supabase נותן ל-service_role הרשאות מלאות לבד. מבטלים, ונותנים רק מה שהמוצר צריך
+revoke all on public.places      from service_role;
+revoke all on public.daily_cards from service_role;
+revoke all on public.source_log  from service_role;
+
 grant select, update         on public.places      to service_role;
 grant select, insert         on public.daily_cards to service_role;
 grant select, insert, update on public.source_log  to service_role;
