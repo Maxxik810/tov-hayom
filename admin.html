@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Tov Hayom · ניהול</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- supabase-js for sign-in only. It never reads a table. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+          integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+          crossorigin="anonymous"></script>
+</head>
+<body class="admin">
+  <header class="topbar admin-topbar">
+    <h1 class="logo"><span dir="ltr"><span class="logo-tov">Tov</span> Hayom</span> · ניהול</h1>
+    <button id="logout" class="btn btn--secondary btn--sm" type="button" hidden>יציאה</button>
+  </header>
+
+  <main class="admin-page">
+    <!-- 8. Sign-in -->
+    <section id="login-view" class="login-card" aria-labelledby="login-title" hidden>
+      <h2 id="login-title" class="login-title">כניסה</h2>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="login-email">מייל</label>
+          <input id="login-email" name="email" type="email" autocomplete="username" dir="ltr" required>
+        </div>
+        <div class="field">
+          <label for="login-password">סיסמה</label>
+          <input id="login-password" name="password" type="password" autocomplete="current-password" dir="ltr" required>
+        </div>
+        <button id="login-submit" class="btn btn--primary btn--full" type="submit">כניסה</button>
+        <p id="login-error" class="form-error" role="alert"></p>
+      </form>
+    </section>
+
+    <!-- 9. Places table -->
+    <section id="places-view" aria-labelledby="places-title" hidden>
+      <h2 id="places-title" class="section-title">מקומות</h2>
+      <p id="list-error" class="form-error" role="alert"></p>
+      <div class="table-wrap" tabindex="0" role="region" aria-labelledby="places-title">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th scope="col">שם</th>
+              <th scope="col">קטגוריה</th>
+              <th scope="col">אזור</th>
+              <th scope="col">רמה</th>
+              <th scope="col">תאריך בדיקה</th>
+              <th scope="col">דיווחים</th>
+              <th scope="col">חסום</th>
+            </tr>
+          </thead>
+          <tbody id="places-body"></tbody>
+        </table>
+      </div>
+      <div class="table-foot">
+        <p id="saved" class="saved" role="status" aria-live="polite"></p>
+        <p id="count" class="caption"></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 10. Confirm blocking today's place -->
+  <dialog id="confirm-dialog" class="modal modal--sm" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+    <span class="state-icon state-icon--error modal__mark" aria-hidden="true">!</span>
+    <h2 id="confirm-title" class="modal__title">לחסום את המקום של היום?</h2>
+    <p id="confirm-text">זה המקום של היום. חסימה תציג 'אין לנו המלצה מאומתת להיום' עד מחר.</p>
+    <div class="modal__actions">
+      <button id="confirm-yes" class="btn btn--danger" type="button">כן, לחסום</button>
+      <button id="confirm-no" class="btn btn--secondary" type="button" autofocus>ביטול</button>
+    </div>
+  </dialog>
+
+  <!-- 11. Edit a place -->
+  <dialog id="edit-dialog" class="modal" aria-labelledby="edit-title">
+    <form id="edit-form" novalidate>
+      <div class="modal__head">
+        <h2 id="edit-title" class="modal__title">עריכת מקום</h2>
+        <button id="edit-close" class="close-btn" type="button" aria-label="סגירה">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="f-name">שם</label>
+          <input id="f-name" name="name" type="text" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label for="f-category">קטגוריה</label>
+          <select id="f-category" name="category"></select>
+        </div>
+        <div class="field">
+          <label for="f-area">אזור</label>
+          <select id="f-area" name="area"></select>
+        </div>
+        <div class="field">
+          <label for="f-level">רמת אימות</label>
+          <select id="f-level" name="verification_level"></select>
+        </div>
+        <div class="field">
+          <label for="f-date">תאריך בדיקה אחרון</label>
+          <div class="field-row">
+            <input id="f-date" name="last_verified_at" type="date" aria-describedby="f-date-error">
+            <button id="f-today" class="btn btn--secondary btn--sm" type="button">נבדק היום</button>
+          </div>
+          <p id="f-date-error" class="field-error"></p>
+        </div>
+        <div class="field">
+          <label for="f-source">מקור האימות</label>
+          <input id="f-source" name="verification_source" type="text" maxlength="300">
+        </div>
+        <div class="field">
+          <label for="f-hours">שעות פתיחה</label>
+          <input id="f-hours" name="opening_hours" type="text" maxlength="300">
+        </div>
+        <div class="field">
+          <label for="f-coords">קואורדינטות (lat, lng)</label>
+          <input id="f-coords" name="coords" type="text" dir="ltr" inputmode="decimal" placeholder="31.8044, 34.6553" aria-describedby="f-coords-error">
+          <p id="f-coords-error" class="field-error"></p>
+        </div>
+        <div class="field">
+          <label for="f-gplace">Google Place ID</label>
+          <input id="f-gplace" name="google_place_id" type="text" dir="ltr" maxlength="300">
+        </div>
+        <div class="field">
+          <label for="f-image">קובץ תמונה</label>
+          <input id="f-image" name="image_file" type="text" dir="ltr" maxlength="100" placeholder="ashdod-yam-park.jpg" aria-describedby="f-image-error">
+          <p id="f-image-error" class="field-error"></p>
+        </div>
+        <div class="field field--wide">
+          <label for="f-url">קישור למקור הרשמי</label>
+          <input id="f-url" name="source_url" type="url" dir="ltr" maxlength="500" placeholder="https://" aria-describedby="f-url-error">
+          <p id="f-url-error" class="field-error"></p>
+        </div>
+      </div>
+      <p id="edit-error" class="form-error" role="alert"></p>
+      <div class="modal__actions">
+        <button id="edit-save" class="btn btn--primary" type="submit">שמירה</button>
+        <button id="edit-cancel" class="btn btn--secondary" type="button">ביטול</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>

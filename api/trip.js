@@ -2,6 +2,8 @@
 import { sendOk, sendError, HttpError, readJsonBody, requireAutomationSecret } from '../lib/http.js';
 import { buildHome } from '../lib/home.js';
 import { runDaily } from '../lib/daily.js';
+import { requireAdmin } from '../lib/auth.js';
+import { adminList, adminUpdate } from '../lib/admin.js';
 
 // For each action: the allowed method and the code that handles it
 const ACTIONS = {
@@ -11,6 +13,20 @@ const ACTIONS = {
     run: async req => {
       requireAutomationSecret(req);
       return runDaily(await readJsonBody(req));
+    }
+  },
+  admin_list: {
+    method: 'GET',
+    run: async req => {
+      await requireAdmin(req);
+      return adminList();
+    }
+  },
+  admin_update: {
+    method: 'POST',
+    run: async req => {
+      await requireAdmin(req);
+      return adminUpdate(await readJsonBody(req));
     }
   }
 };
