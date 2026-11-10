@@ -2,6 +2,8 @@
 import { sendOk, sendError, HttpError, readJsonBody, requireAutomationSecret } from '../lib/http.js';
 import { buildHome } from '../lib/home.js';
 import { runDaily } from '../lib/daily.js';
+import { runSimulate } from '../lib/simulate.js';
+import { runAiTest } from '../lib/aitest.js';
 import { requireAdmin } from '../lib/auth.js';
 import { adminList, adminUpdate } from '../lib/admin.js';
 
@@ -13,6 +15,20 @@ const ACTIONS = {
     run: async req => {
       requireAutomationSecret(req);
       return runDaily(await readJsonBody(req));
+    }
+  },
+  simulate: {
+    method: 'POST',
+    run: async req => {
+      requireAutomationSecret(req);
+      return runSimulate(await readJsonBody(req));
+    }
+  },
+  ai_test: {
+    method: 'POST',
+    run: async req => {
+      requireAutomationSecret(req);
+      return runAiTest(await readJsonBody(req));
     }
   },
   admin_list: {
