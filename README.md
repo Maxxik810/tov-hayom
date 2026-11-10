@@ -46,3 +46,10 @@ curl.exe -s -X POST "https://tov-hayom.vercel.app/api/trip?action=daily" -H "Aut
 
 ## מפתחות
 אין אף מפתח בריפו. המפתחות הסודיים נשמרים רק ב-Vercel. `.env.example` מכיל רק את השמות.
+
+## n8n: daily card workflow
+
+`n8n/daily-card.json` is the daily card workflow (every evening 20:00, Israel time). It has no secrets. After importing it into n8n:
+
+1. Connect a Header Auth credential to the "Create tomorrow card" node. Header name `Authorization`, value `Bearer ` followed by the `AUTOMATION_SECRET` value.
+2. Connect a Gmail OAuth2 credential to the "Send a message" node and replace `YOUR_EMAIL` with the address that should get the failure email.

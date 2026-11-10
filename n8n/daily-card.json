@@ -1,0 +1,59 @@
+{
+  "name": "Tov Hayom – daily card",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "triggerAtHour": 20 } ] } },
+      "id": "a1111111-0000-4000-8000-000000000001",
+      "name": "Every evening 20:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tov-hayom.vercel.app/api/trip?action=daily",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "a1111111-0000-4000-8000-000000000002",
+      "name": "Create tomorrow card",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [256, 0],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {},
+      "id": "a1111111-0000-4000-8000-000000000003",
+      "name": "On failure (email goes here)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [512, 128]
+    },
+    {
+      "parameters": {
+        "sendTo": "YOUR_EMAIL",
+        "subject": "הכרטיס של מחר לא נוצר",
+        "message": "הקריאה היומית לאתר טיול היום נכשלה, ולכן הכרטיס של מחר לא נוצר. פתח את ההרצות ב-n8n כדי לראות את קוד השגיאה.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [768, 128],
+      "id": "68770f1d-d08b-4d96-92e3-0457f91216c7",
+      "name": "Send a message"
+    }
+  ],
+  "connections": {
+    "Every evening 20:00": { "main": [ [ { "node": "Create tomorrow card", "type": "main", "index": 0 } ] ] },
+    "Create tomorrow card": { "main": [ [], [ { "node": "On failure (email goes here)", "type": "main", "index": 0 } ] ] },
+    "On failure (email goes here)": { "main": [ [ { "node": "Send a message", "type": "main", "index": 0 } ] ] }
+  },
+  "settings": { "timezone": "Asia/Jerusalem" },
+  "pinData": {}
+}
