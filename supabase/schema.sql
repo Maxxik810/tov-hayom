@@ -92,3 +92,65 @@ revoke all on public.source_log  from service_role;
 grant select, update         on public.places      to service_role;
 grant select, insert         on public.daily_cards to service_role;
 grant select, insert, update on public.source_log  to service_role;
+
+-- ---------- דיווחים (Milestone 5, נוסף ב-14.11.2026) ----------
+-- עדכון מותנה אחד בבסיס הנתונים, כי שני דיווחים יכולים להגיע באותו רגע.
+
+-- מוסיפה דיווח רק אם יש למקום פחות מ-p_max דיווחים פתוחים. מחזירה true אם נוסף.
+create or replace function public.add_report(p_place_id uuid, p_report jsonb, p_max int)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_rows int;
+begin
+  update public.places p
+     set reports = p.reports || jsonb_build_array(p_report)
+   where p.id = p_place_id
+     and (select count(*)
+            from jsonb_array_elements(p.reports) as r(item)
+           where r.item->>'status' = 'open') < p_max;
+  get diagnostics v_rows = row_count;
+  return v_rows > 0;
+end;
+$$;
+
+-- מסמנת דיווח "טופל" או "נדחה". מחזירה true אם הדיווח נמצא.
+create or replace function public.set_report_status(p_place_id uuid, p_report_id text, p_status text)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_rows int;
+begin
+  if p_status is null or p_status not in ('handled', 'rejected') then
+    return false;
+  end if;
+
+  update public.places p
+     set reports = (
+       select jsonb_agg(
+                case when r.item->>'id' = p_report_id
+                     then r.item || jsonb_build_object('status', p_status, 'status_at', now())
+                     else r.item
+                end
+                order by r.ord)
+         from jsonb_array_elements(p.reports) with ordinality as r(item, ord)
+     )
+   where p.id = p_place_id
+     and exists (select 1
+                   from jsonb_array_elements(p.reports) as r(item)
+                  where r.item->>'id' = p_report_id);
+  get diagnostics v_rows = row_count;
+  return v_rows > 0;
+end;
+$$;
+
+revoke execute on function public.add_report(uuid, jsonb, int)         from public, anon, authenticated;
+revoke execute on function public.set_report_status(uuid, text, text) from public, anon, authenticated;
+grant  execute on function public.add_report(uuid, jsonb, int)         to service_role;
+grant  execute on function public.set_report_status(uuid, text, text) to service_role;
