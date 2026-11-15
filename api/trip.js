@@ -5,7 +5,7 @@ import { runDaily } from '../lib/daily.js';
 import { runSimulate } from '../lib/simulate.js';
 import { runAiTest } from '../lib/aitest.js';
 import { requireAdmin } from '../lib/auth.js';
-import { adminList, adminUpdate } from '../lib/admin.js';
+import { adminList, adminUpdate, adminReport } from '../lib/admin.js';
 import { getRating } from '../lib/rating.js';
 import { addReport } from '../lib/report.js';
 
@@ -47,6 +47,13 @@ const ACTIONS = {
     run: async req => {
       await requireAdmin(req);
       return adminUpdate(await readJsonBody(req));
+    }
+  },
+  admin_report: {
+    method: 'POST',
+    run: async req => {
+      await requireAdmin(req);
+      return adminReport(await readJsonBody(req));
     }
   }
 };

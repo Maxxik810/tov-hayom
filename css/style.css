@@ -306,8 +306,35 @@ button { font: inherit; color: inherit; }
 .name-btn { background: none; border: 0; padding: 4px 0; font-weight: 700; cursor: pointer; text-align: start; color: inherit; }
 .name-btn:hover { color: var(--blue); text-decoration: underline; }
 .reports-pill {
-  display: inline-block; border-radius: 999px; padding: 2px 10px;
+  display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; padding: 2px 10px;
   background: var(--muted-bg); color: var(--text-2); font-weight: 700; font-size: 13px;
+}
+.reports-pill--urgent { background: var(--error-bg); color: var(--error); }
+.flag-icon { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* דיווחים פתוחים בטופס העריכה (F23) */
+.reports-box { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+.reports-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.reports-title { font-size: 18px; font-weight: 700; margin: 0; }
+.reports-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; }
+.report-item {
+  display: flex; gap: 12px; align-items: flex-start; justify-content: space-between;
+  border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--surface);
+}
+.report-item__main { min-width: 0; flex: 1; }
+.report-item__meta { margin: 0; font-size: 13px; color: var(--text-2); display: flex; gap: 10px; flex-wrap: wrap; }
+.report-item__type { font-weight: 700; color: inherit; }
+.report-item__text { margin: 6px 0 0; white-space: pre-line; overflow-wrap: anywhere; }
+.report-item__ai { margin: 6px 0 0; font-size: 14px; display: flex; gap: 6px; flex-wrap: wrap; align-items: baseline; }
+.report-item__ai-label { font-weight: 700; }
+.report-item__none { color: var(--text-2); }
+.report-item__actions { display: flex; flex-direction: column; gap: 6px; flex: none; }
+.urgency { border-radius: 8px; padding: 0 8px; font-size: 12px; font-weight: 700; }
+.urgency--urgent { background: var(--error-bg); color: var(--error); }
+.urgency--normal { background: var(--muted-bg); color: var(--text-2); }
+@media (max-width: 560px) {
+  .report-item { flex-direction: column; }
+  .report-item__actions { flex-direction: row; }
 }
 .table-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px; min-height: 24px; }
 .saved { color: var(--green); font-weight: 700; }

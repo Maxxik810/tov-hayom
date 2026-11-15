@@ -102,8 +102,11 @@ logoutBtn.addEventListener('click', async () => {
 
 // ---------- 9. places table ----------
 const byName = (a, b) => a.name.localeCompare(b.name, 'he');
-const openReports = place => (Array.isArray(place.reports) ? place.reports : [])
-  .filter(r => (r?.status ?? 'open') === 'open').length;
+// Open reports of a place, newest first
+const openReportList = place => (Array.isArray(place.reports) ? place.reports : [])
+  .filter(r => r && (r.status ?? 'open') === 'open')
+  .sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')));
+const isUrgent = r => r?.ai?.urgency === 'urgent';
 
 async function showPlaces() {
   loginView.hidden = true;
@@ -112,7 +115,7 @@ async function showPlaces() {
   $('list-error').textContent = '';
   tbody.replaceChildren(rowMessage('טוען...'));
   try {
-    const [data] = await Promise.all([api('admin_list'), loadLists().then(l => { lists = l; })]);
+    const [data] = await Promise.all([api('admin_list'), loadLists().then(l => { lists = l; }), loadReportTypes()]);
     state.date = data.date;
     state.todayId = data.today_place_id;
     state.places = data.places.sort(byName);
@@ -154,11 +157,14 @@ function renderRow(place) {
   const levelCell = el('td');
   levelCell.append(renderBadge(place.verification_level));
 
-  const reports = openReports(place);
+  const open = openReportList(place);
   const reportsCell = el('td');
-  if (reports > 0) {
-    const pill = el('span', 'reports-pill', `⚑ ${reports}`);
-    pill.setAttribute('aria-label', `${reports} דיווחים פתוחים`);
+  if (open.length > 0) {
+    const urgent = open.some(isUrgent);
+    const pill = el('span', `reports-pill${urgent ? ' reports-pill--urgent' : ''}`);
+    pill.append(flagIcon(), el('span', '', String(open.length)));
+    if (urgent) pill.append(el('span', '', 'דחוף'));
+    pill.setAttribute('aria-label', `${open.length} דיווחים פתוחים${urgent ? ', אחד מהם דחוף' : ''}`);
     reportsCell.append(pill);
   } else {
     reportsCell.textContent = '—';
@@ -313,6 +319,8 @@ function openEdit(id) {
   $('f-url').value = place.source_url ?? '';
   // "נבדק היום" needs the date from admin_list. Without it: disabled, type the date by hand.
   $('f-today').disabled = !state.date;
+  renderReports(place);
+  $('report-saved').textContent = '';
   editDialog.showModal();
   $('f-name').focus();
 }
@@ -416,6 +424,121 @@ editForm.addEventListener('submit', async e => {
     showSaved('נשמר');
   }
 });
+
+// ---------- 11. open reports in the edit form (F23) ----------
+let reportTypes = new Map();
+async function loadReportTypes() {
+  if (reportTypes.size) return;
+  try {
+    const res = await fetch('data/report-types.json');
+    if (res.ok) reportTypes = new Map((await res.json()).map(t => [t.id, t.label]));
+  } catch { /* labels fall back to the id */ }
+}
+const reportTypeLabel = id => reportTypes.get(id) ?? id ?? '';
+
+function flagIcon() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.classList.add('flag-icon');
+  const path = document.createElementNS(ns, 'path');
+  path.setAttribute('d', 'M5 21V4m0 0h11l-2 4 2 4H5');
+  svg.append(path);
+  return svg;
+}
+
+// ISO time -> "15.11.2026 · 12:55" in Israel time
+const reportParts = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit', year: 'numeric',
+  hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+});
+function formatReportTime(iso) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const p = Object.fromEntries(reportParts.formatToParts(d).map(x => [x.type, x.value]));
+  return `${p.day}.${p.month}.${p.year} · ${p.hour}:${p.minute}`;
+}
+
+// All report text goes in with textContent, never as HTML
+function renderReports(place) {
+  const box = $('reports-box');
+  const open = openReportList(place);
+  box.replaceChildren();
+  box.hidden = open.length === 0;
+  if (open.length === 0) return;
+
+  const head = el('div', 'reports-head');
+  head.append(el('h3', 'reports-title', `דיווחים פתוחים (${open.length})`));
+  if (place.source_url) {
+    const link = el('a', 'link-btn', 'פתיחת המקור הרשמי ‹');
+    link.href = place.source_url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    head.append(link);
+  }
+  const list = el('ul', 'reports-list');
+  for (const report of open) list.append(renderReport(place, report));
+  box.append(head, list, el('p', 'report-msg form-error'));
+  box.lastChild.setAttribute('role', 'alert');
+}
+
+function renderReport(place, report) {
+  const li = el('li', 'report-item');
+  const main = el('div', 'report-item__main');
+  const meta = el('p', 'report-item__meta');
+  meta.append(el('span', '', formatReportTime(report.created_at)), el('span', 'report-item__type', reportTypeLabel(report.type)));
+  main.append(meta);
+  if (report.text) {
+    const text = el('p', 'report-item__text', report.text);
+    text.dir = 'auto';
+    main.append(text);
+  }
+
+  const ai = el('p', 'report-item__ai');
+  ai.append(el('span', 'report-item__ai-label', 'סיווג:'));
+  if (report.ai && typeof report.ai.summary === 'string') {
+    const urgent = isUrgent(report);
+    ai.append(el('span', `urgency urgency--${urgent ? 'urgent' : 'normal'}`, urgent ? 'דחוף' : 'רגיל'),
+      el('span', '', report.ai.summary));
+  } else {
+    ai.append(el('span', 'report-item__none', 'לא סווג'));
+  }
+  main.append(ai);
+
+  const actions = el('div', 'report-item__actions');
+  for (const [status, label] of [['handled', 'טופל'], ['rejected', 'נדחה']]) {
+    const btn = el('button', 'btn btn--secondary btn--sm', label);
+    btn.type = 'button';
+    btn.setAttribute('aria-label', `${label}: ${reportTypeLabel(report.type)} מ-${formatReportTime(report.created_at)}`);
+    btn.addEventListener('click', () => setReportStatus(place.id, report.id, status, li));
+    actions.append(btn);
+  }
+  li.append(main, actions);
+  return li;
+}
+
+// Saved right away, without the form's "שמירה"
+async function setReportStatus(placeId, reportId, status, li) {
+  const buttons = li.querySelectorAll('button');
+  buttons.forEach(b => { b.disabled = true; });
+  const msg = $('reports-box').querySelector('.report-msg');
+  if (msg) msg.textContent = '';
+  $('report-saved').textContent = '';
+  try {
+    const { place } = await api('admin_report', { place_id: placeId, report_id: reportId, status });
+    const i = state.places.findIndex(p => p.id === placeId);
+    if (i >= 0) state.places[i] = place;
+    renderTable();
+    renderReports(place);
+    showSaved('נשמר');
+    $('report-saved').textContent = 'נשמר';
+    (($('reports-box').querySelector('.report-item button')) ?? $('edit-save')).focus();
+  } catch (err) {
+    buttons.forEach(b => { b.disabled = false; });
+    await handleError(err, m => { if (msg) msg.textContent = m; });
+  }
+}
 
 // ---------- start ----------
 const { data } = await auth.getSession();
