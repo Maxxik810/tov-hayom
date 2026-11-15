@@ -1,0 +1,5 @@
+[
+  { "id": "hours", "label": "שעות לא נכונות" },
+  { "id": "closed", "label": "המקום סגור" },
+  { "id": "other", "label": "אחר" }
+]

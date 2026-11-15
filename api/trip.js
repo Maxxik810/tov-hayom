@@ -7,11 +7,13 @@ import { runAiTest } from '../lib/aitest.js';
 import { requireAdmin } from '../lib/auth.js';
 import { adminList, adminUpdate } from '../lib/admin.js';
 import { getRating } from '../lib/rating.js';
+import { submitReport } from '../lib/report.js';
 
 // For each action: the allowed method and the code that handles it
 const ACTIONS = {
   home: { method: 'GET', run: async () => buildHome() },
   rating: { method: 'GET', run: async req => getRating(String(req.query?.place_id ?? '')) },
+  report: { method: 'POST', run: async req => submitReport(await readJsonBody(req)) },
   daily: {
     method: 'POST',
     run: async req => {

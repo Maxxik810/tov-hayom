@@ -4,6 +4,7 @@
 import { areaLabel, formatDate } from './lists.js';
 import { renderBadge } from './badge.js';
 import { metaText } from './card.js';
+import { showReportForm } from './report.js';
 
 const dialog = document.getElementById('details');
 const body = dialog.querySelector('.sheet__body');
@@ -94,7 +95,14 @@ export function openDetails(place, from) {
   const area = infoRow('pin', 'אזור', areaLabel(place.area));
   rows.append(hours.li, rating.li, area.li);
 
-  body.replaceChildren(head, rows);
+  const report = el('button', 'link-btn report-link', 'דווחו על טעות');
+  report.type = 'button';
+  report.addEventListener('click', () => {
+    openId += 1; // a late rating answer must not touch the form
+    showReportForm(body, place, { onBack: () => openDetails(place, opener) });
+  });
+
+  body.replaceChildren(head, rows, report);
   if (!dialog.open) dialog.showModal();
   dialog.querySelector('.close-btn').focus();
 
