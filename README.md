@@ -53,3 +53,11 @@ curl.exe -s -X POST "https://tov-hayom.vercel.app/api/trip?action=daily" -H "Aut
 
 1. Connect a Header Auth credential to the "Create tomorrow card" node. Header name `Authorization`, value `Bearer ` followed by the `AUTOMATION_SECRET` value.
 2. Connect a Gmail OAuth2 credential to the "Send a message" node and replace `YOUR_EMAIL` with the address that should get the failure email.
+
+## n8n: report email workflow
+
+`n8n/report-email.json` is automation 2: every report a visitor sends (action `report`) calls this webhook, and n8n emails the admin. It has no secrets. After importing it into n8n:
+
+1. Connect a Header Auth credential to the "New report" node. Header name `x-webhook-secret`, value = the `N8N_WEBHOOK_SECRET` value in Vercel.
+2. Connect the Gmail OAuth2 credential to the "Email to Max" node and replace `YOUR_EMAIL`.
+3. Publish, then put the production webhook URL in Vercel as `N8N_WEBHOOK_URL` and redeploy.

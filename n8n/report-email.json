@@ -1,0 +1,56 @@
+{
+  "name": "Tov Hayom – report email",
+  "settings": {
+    "timezone": "Asia/Jerusalem",
+    "executionOrder": "v1"
+  },
+  "nodes": [
+    {
+      "name": "New report",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tov-hayom-report",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "name": "Email to Max",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "sendTo": "YOUR_EMAIL",
+        "subject": "=[Tov Hayom] דיווח{{ $json.body.ai && $json.body.ai.urgency === 'urgent' ? ' דחוף' : '' }}: {{ $json.body.place_name }}",
+        "emailType": "text",
+        "message": "=דיווח חדש על טעות ב-Tov Hayom\n\nמקום: {{ $json.body.place_name }}\nקטגוריה ואזור: {{ $json.body.category }}, {{ $json.body.area }}\nסוג שהמשתמש בחר: {{ $json.body.type_label }}\nטקסט: {{ $json.body.text || '(בלי טקסט)' }}\n\nסיווג הסוכן: {{ $json.body.ai ? ($json.body.ai.urgency === 'urgent' ? 'דחוף' : 'רגיל') + ', ' + ({ hours: 'שעות לא נכונות', closed: 'המקום סגור', other: 'אחר' }[$json.body.ai.type] || $json.body.ai.type) + '. ' + $json.body.ai.summary : 'לא סווג' }}\n\nמקור רשמי לבדיקה: {{ $json.body.source_url || 'אין קישור' }}\nמסך הניהול: https://tov-hayom.vercel.app/admin.html\nהתקבל: {{ $json.body.created_at }}",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    }
+  ],
+  "connections": {
+    "New report": {
+      "main": [
+        [
+          {
+            "node": "Email to Max",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
