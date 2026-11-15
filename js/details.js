@@ -4,6 +4,7 @@
 import { areaLabel, formatDate } from './lists.js';
 import { renderBadge } from './badge.js';
 import { metaText } from './card.js';
+import { renderReportForm } from './report.js';
 
 const dialog = document.getElementById('details');
 const body = dialog.querySelector('.sheet__body');
@@ -21,6 +22,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 const ICONS = {
   clock: [['circle', { cx: 12, cy: 12, r: 9 }], ['path', { d: 'M12 7v5l3 2' }]],
   star: [['path', { d: 'm12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z' }]],
+  flag: [['path', { d: 'M5 21V4' }], ['path', { d: 'M5 4h11l-2 4 2 4H5' }]],
   pin: [['path', { d: 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z' }], ['circle', { cx: 12, cy: 9.5, r: 2.5 }]]
 };
 function icon(name) {
@@ -94,7 +96,19 @@ export function openDetails(place, from) {
   const area = infoRow('pin', 'אזור', areaLabel(place.area));
   rows.append(hours.li, rating.li, area.li);
 
-  body.replaceChildren(head, rows);
+  const report = el('button', 'report-link');
+  report.type = 'button';
+  const flag = icon('flag');
+  flag.setAttribute('aria-hidden', 'true');
+  report.append(flag, el('span', '', 'דווחו על טעות'));
+  const details = [head, rows, report];
+  const backToDetails = () => {
+    body.replaceChildren(...details);
+    report.focus();
+  };
+  report.addEventListener('click', () => renderReportForm(body, place, backToDetails));
+
+  body.replaceChildren(...details);
   if (!dialog.open) dialog.showModal();
   dialog.querySelector('.close-btn').focus();
 
