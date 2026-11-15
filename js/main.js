@@ -1,12 +1,14 @@
 // The main screen: one call to action=home, then today's card, the shelf and the states.
 import { loadLists } from './lists.js';
 import { renderCard } from './card.js';
+import { openDetails } from './details.js';
 
 const todayBox = document.getElementById('today');
 const shelfSection = document.getElementById('shelf-section');
 const shelf = document.getElementById('shelf');
 const dots = document.getElementById('shelf-dots');
 const main = document.getElementById('main');
+let placesById = new Map();
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -82,6 +84,9 @@ async function load() {
     const data = await res.json();
     if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
+    placesById = new Map((data.shelf ?? []).map(p => [p.id, p]));
+    if (data.today) placesById.set(data.today.place.id, data.today.place);
+
     if (data.today) {
       todayBox.replaceChildren(renderCard(data.today.place, { variant: 'today', sentence: data.today.sentence }));
     } else {
@@ -95,5 +100,12 @@ async function load() {
     main.removeAttribute('aria-busy');
   }
 }
+
+// "לפרטים" on today's card, or a shelf card, opens place details
+main.addEventListener('click', e => {
+  const button = e.target.closest('[data-details]');
+  const place = placesById.get(button?.closest('[data-place-id]')?.dataset.placeId);
+  if (place) openDetails(place, button);
+});
 
 load();

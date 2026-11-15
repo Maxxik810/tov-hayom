@@ -6,10 +6,12 @@ import { runSimulate } from '../lib/simulate.js';
 import { runAiTest } from '../lib/aitest.js';
 import { requireAdmin } from '../lib/auth.js';
 import { adminList, adminUpdate } from '../lib/admin.js';
+import { getRating } from '../lib/rating.js';
 
 // For each action: the allowed method and the code that handles it
 const ACTIONS = {
   home: { method: 'GET', run: async () => buildHome() },
+  rating: { method: 'GET', run: async req => getRating(String(req.query?.place_id ?? '')) },
   daily: {
     method: 'POST',
     run: async req => {

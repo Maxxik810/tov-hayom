@@ -197,6 +197,7 @@ button { font: inherit; color: inherit; }
   border-radius: 999px; padding: 2px 12px; font-size: 14px;
 }
 .rating-num { font-weight: 700; }
+.hours-text { white-space: pre-line; }
 .stars { color: var(--rating); letter-spacing: 1px; }
 .stars-off { color: var(--border); }
 .g-maps { font-size: 13px; color: var(--text-2); }

@@ -42,14 +42,19 @@ export function renderCard(place, { variant, sentence = '' }) {
       check,
       el('p', 'card__sentence', sentence)
     );
+    const more = el('button', 'link-btn', 'לפרטים ‹');
+    more.type = 'button';
+    more.dataset.details = '';
+    body.append(more);
     card.append(media(place), body);
     return card;
   }
 
-  // Shelf card: the whole card is one button (place details open from it in Milestone 5)
+  // Shelf card: the whole card is one button that opens place details
   const card = el('button', 'card card--shelf');
   card.type = 'button';
   card.dataset.placeId = place.id;
+  card.dataset.details = '';
   const label = el('span', 'card__body');
   label.append(
     el('span', 'card__title', place.name),
